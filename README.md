@@ -5,7 +5,7 @@
 pip install adafruit-io python-dotenv flask flask-sqlalchemy
 ```
 ## 2. Cấu hình môi trường
-Tạo file .env trong thư mục gốc gồm:
+Tạo file .env trong thư mục /Code gồm:
 ```bash
 ADA_USERNAME=<Your Adafruit username>
 ADA_KEY=<Your Adafruit key>
