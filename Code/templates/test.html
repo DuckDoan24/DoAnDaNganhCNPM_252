@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"> 
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <link rel="stylesheet" href="../static/styles/test.css"/>
+</head>
+<body>
+    <h1>Test LED button</h1>
+    <label class="switch">
+        <input type="checkbox" id="toggle">
+        <span class="slider"></span>
+    </label>
+</body>
+</html>
+<script>
+    document.getElementById("toggle").addEventListener("change", function () {
+
+        let value = this.checked ? 1 : 0;
+
+        fetch("/led", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ state: value })
+        });
+    });
+</script>
