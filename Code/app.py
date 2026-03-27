@@ -16,6 +16,8 @@ AIO_KEY = os.getenv("ADA_KEY")
 def connected (client) :
     print ("Ket noi thanh cong ...")
     client.subscribe("led")
+    client.subscribe("fan-speed")
+    client.subscribe("led-color")
 
 def subscribe (client, userdata, mid, granted_qos) :
     print ("Subcribe thanh cong ...")
@@ -50,6 +52,22 @@ def submit_led():
     req = request.json
     data = req["state"]  
     client.publish("led", data)
+    return {"status": "ok"}
+
+# API dieu khien toc do quat
+@app.route('/fan', methods=['POST'])
+def submit_fan():
+    req = request.json
+    data = req.get("speed", "0")
+    client.publish("fan-speed", data)
+    return {"status": "ok"}
+
+# API dieu khien mau den
+@app.route('/color', methods=['POST'])
+def submit_color():
+    req = request.json
+    data = req.get("color", "#FFFFFF")
+    client.publish("led-color", data)
     return {"status": "ok"}
 
 if __name__ == "__main__":
