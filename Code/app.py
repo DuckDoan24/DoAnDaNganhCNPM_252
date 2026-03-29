@@ -46,7 +46,7 @@ app = Flask(__name__)
 def index():
     return render_template('test.html')
 
-# Vi du API bat tat den
+# Vi du API bat/tat den
 @app.route('/led', methods=['POST'])
 def submit_led():
     req = request.json
