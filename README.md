@@ -18,4 +18,5 @@ DB_PASSWORD=<Your DB Password>
 ```bash
 python app.py
 ```
+API document: /localhost/apidocs
 Lưu ý: Code có 1 API test gửi dữ liệu đến Adafruit sử dụng feed tên 'led', nên tài khoản Adafruit liên kết đến cần 1 feed tên 'led'
