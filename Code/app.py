@@ -29,6 +29,8 @@ _temp_history_lock = threading.Lock()
 def connected (client) :
     print ("Ket noi thanh cong ...")
     client.subscribe("led")
+    client.subscribe("fan-speed")
+    client.subscribe("led-color")
     client.subscribe("temperature")
     client.subscribe("humidity")
     client.subscribe("brightness")
@@ -119,7 +121,7 @@ bcrypt = Bcrypt(app)
 def index():
     return render_template('test.html')
 
-# Vi du API bat tat den
+# Vi du API bat/tat den
 @app.route('/led', methods=['POST'])
 def submit_led():
     print('register')
@@ -128,6 +130,21 @@ def submit_led():
     client.publish("led", data)
     return {"status": "ok"}
 
+# API dieu khien toc do quat
+@app.route('/fan', methods=['POST'])
+def submit_fan():
+    req = request.json
+    data = req.get("speed", "0")
+    client.publish("fan-speed", data)
+    return {"status": "ok"}
+
+# API dieu khien mau den
+@app.route('/color', methods=['POST'])
+def submit_color():
+    req = request.json
+    data = req.get("color", "#FFFFFF")
+    client.publish("led-color", data)
+    return {"status": "ok"}
 @app.route('/temperature', methods=['GET'])
 def get_temperature():
     data = client.receive('temperature')
