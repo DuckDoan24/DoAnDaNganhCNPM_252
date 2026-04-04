@@ -4,6 +4,7 @@ import json
 import sys
 from Adafruit_IO import MQTTClient
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 ##########################################
 ##### Khoi tao lien ket den Adafruit #####
@@ -16,6 +17,13 @@ LOCAL_DATA_DIR = os.path.join(BASE_DIR, "data")
 TEMPERATURE_HISTORY_FILE = os.path.join(LOCAL_DATA_DIR, "temperature_history.jsonl")
 TEMP_HISTORY_MAX_ITEMS = 1000
 _temp_history_lock = threading.Lock()
+
+latest_temp = None
+temp_time = None
+latest_humid = None
+humid_time = None
+latest_bright = None
+bright_time = None
 
 def connected (client) :
     print ("Ket noi thanh cong ...")
@@ -34,7 +42,17 @@ def disconnected (client) :
     sys.exit (1)
 
 def message (client, feed_id, payload):
-    print ("Nhan du lieu :" + payload)
+    global latest_humid, humid_time, latest_bright, bright_time, latest_temp, temp_time
+    if feed_id == "temperature":
+        latest_temp = _parse_number(payload)
+        temp_time = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(microsecond=0).isoformat()
+        _append_temperature_history(latest_temp, temp_time)
+    elif feed_id == "humidity":
+        latest_humid = _parse_number(payload)
+        humid_time = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(microsecond=0).isoformat()
+    elif feed_id == "brightness":
+        latest_bright = _parse_number(payload)
+        bright_time = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(microsecond=0).isoformat()
 
 def _parse_number(value):
     try:
@@ -50,7 +68,7 @@ def _append_temperature_history(value, created_at=None):
     _ensure_local_data_dir()
     entry = {
         "value": _parse_number(value),
-        "created_at": created_at or datetime.now(timezone.utc).isoformat(),
+        "created_at": created_at or datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(microsecond=0).isoformat(),
     }
 
     with _temp_history_lock:

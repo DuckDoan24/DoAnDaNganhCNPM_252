@@ -102,6 +102,6 @@ def submit_color():
               type: string
     """
     req = request.json
-    data = req.get("color", "#FFFFFF")
-    client.publish("led-color", data)
+    data = req.get("color", "1")
+    client.publish("led", data)
     return {"status": "ok"}

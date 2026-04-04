@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
-from mqtt import client, _parse_number, _append_temperature_history, _read_temperature_history
-
+import mqtt 
 sensor_bp = Blueprint('sensor', __name__)
 
 @sensor_bp.route('/temperature', methods=['GET'])
@@ -23,15 +22,10 @@ def get_temperature():
             created_at:
               type: string
     """
-    data = client.receive('temperature')
-    value = _parse_number(getattr(data, "value", None))
-    created_at = getattr(data, "created_at", None)
-    _append_temperature_history(value, created_at)
-
     return {
         "feed": "temperature",
-        "value": value,
-        "created_at": created_at,
+        "value": mqtt.latest_temp,
+        "created_at": mqtt.temp_time,
     }
 
 @sensor_bp.route('/temperature/history', methods=['GET'])
@@ -68,7 +62,7 @@ def get_temperature_history():
     if limit > 100:
         limit = 100
 
-    history = _read_temperature_history(limit)
+    history = mqtt._read_temperature_history(limit)
 
     return {
         "feed": "temperature",
@@ -96,11 +90,10 @@ def get_humidity():
             created_at:
               type: string
     """
-    data = client.receive("humidity")
     return {
         "feed": "humidity",
-        "value": _parse_number(getattr(data, "value", None)),
-        "created_at": getattr(data, "created_at", None),
+        "value": mqtt.latest_humid,
+        "created_at": mqtt.humid_time,
     }
 
 @sensor_bp.route('/brightness', methods=['GET'])
@@ -123,9 +116,8 @@ def get_brightness():
             created_at:
               type: string
     """
-    data = client.receive("brightness")
     return {
         "feed": "brightness",
-        "value": _parse_number(getattr(data, "value", None)),
-        "created_at": getattr(data, "created_at", None),
+        "value": mqtt.latest_bright,
+        "created_at": mqtt.bright_time,
     }
