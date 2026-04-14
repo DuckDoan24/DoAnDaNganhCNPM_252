@@ -33,7 +33,6 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // 1. Basic validation before sending to backend
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -44,10 +43,8 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
       return;
     }
 
-    // 2. Call your Python Backend
     final errorMessage = await AuthService.login(email, password);
 
-    // 3. Handle the Result
     if (errorMessage == null) {
       // SUCCESS: The backend returned 200 and we saved the token.
       // Use pushReplacement so the user can't hit the "Back" arrow to go back to the login screen.
@@ -100,10 +97,8 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 1. Logo Section (Centered automatically inside Center child)
                           const Center(
                             child: AuthLogoSection(
-                              // LOGO PATH
                               logoAssetPath: 'images/logo.png',
                               descriptionText:
                                   'Đăng nhập để quản lí ngôi nhà thông minh của bạn',
@@ -111,9 +106,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                           ),
                           const SizedBox(height: 60), // Substantial top spacing
 
-                          // 2. Email Field Label & Input
                           AuthTextField(
-                            // Label (Verbatim from design)
                             label: 'Email',
                             hint: 'Nhập email của bạn',
                             controller: _emailController,
@@ -121,9 +114,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                           ),
                           const SizedBox(height: 25), // Field spacing
 
-                          // 3. Password Field Label & Input
                           AuthTextField(
-                            // Label (Verbatim from design)
                             label: 'Mật khẩu',
                             hint: 'Nhập mật khẩu của bạn',
                             controller: _passwordController,
@@ -131,9 +122,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                           ),
                           const SizedBox(height: 15), // Small link spacing
 
-                          // 4. "Forgot Password" Link (Right-Aligned, Green)
                           AuthTextLink(
-                            // Verbatim from design
                             text: 'Quên mật khẩu?',
                             alignment: Alignment.centerRight,
                             onPressed: () {
@@ -143,17 +132,13 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                           ),
                           const SizedBox(height: 40), // Spacing before main button
 
-                          // 5. "Login" Primary Button (Green, Full Width)
                           AuthButton(
-                            // Verbatim from design
                             text: 'Đăng nhập',
                             onPressed: _handleLogin,
                           ),
                           const SizedBox(height: 20), // Button-Link spacing
 
-                          // 6. "No account? Register?" Link (Left-Aligned, Green)
                           AuthTextLink(
-                            // Verbatim from design
                             text: 'Chưa có tài khoản? Đăng ký?',
                             alignment: Alignment.centerLeft,
                             onPressed: () {
@@ -164,7 +149,6 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                                 ),
                               );
                             },
-                            isBold: true,
                           ),
                         ],
                       ),

@@ -1,7 +1,7 @@
 // lib/screens/web_register_screen.dart
 
 import 'package:flutter/material.dart';
-import '../widgets/auth_widgets.dart'; // Reusing your existing widgets
+import '../widgets/auth_widgets.dart'; 
 import '../services/auth_service.dart';
 
 class WebRegisterScreen extends StatefulWidget {
@@ -48,7 +48,6 @@ class _WebRegisterScreenState extends State<WebRegisterScreen> {
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    // 2. Validate empty fields
     if (email.isEmpty || fullname.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -59,7 +58,6 @@ class _WebRegisterScreenState extends State<WebRegisterScreen> {
       return;
     }
 
-    // 3. Validate matching passwords
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -70,7 +68,6 @@ class _WebRegisterScreenState extends State<WebRegisterScreen> {
       return;
     }
 
-    // 4. Call the Backend API
     final errorMessage = await AuthService.register(
       email: email,
       fullname: fullname,
@@ -79,7 +76,6 @@ class _WebRegisterScreenState extends State<WebRegisterScreen> {
       password: password,
     );
 
-    // 5. Handle the Result
     if (errorMessage == null) {
       // SUCCESS: Show a green success message
       if (mounted) {
@@ -107,13 +103,11 @@ class _WebRegisterScreenState extends State<WebRegisterScreen> {
 
 
   Future<void> _selectDate(BuildContext context) async {
-    // 1. Show the built-in Flutter calendar popup
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime(2005, 1, 1), // Default starting date
       firstDate: DateTime(1900), // Oldest selectable date
       lastDate: DateTime.now(), // Cannot pick a future date
-      // 2. Custom theme to make the calendar match your green brand color
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -128,12 +122,9 @@ class _WebRegisterScreenState extends State<WebRegisterScreen> {
       },
     );
 
-    // 3. If the user picked a date (and didn't hit cancel)
     if (picked != null) {
-      // Format it to DD/MM/YYYY so it matches your Figma design perfectly
       final formattedDate = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
       
-      // 4. Update the text controller, which automatically updates the UI
       setState(() {
         _dobController.text = formattedDate;
       });

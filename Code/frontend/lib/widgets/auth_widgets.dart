@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-// 1. The Logo & Description Section (Centered)
 class AuthLogoSection extends StatelessWidget {
   // Pass the actual asset path to the logo image
   final String logoAssetPath;
@@ -39,7 +38,6 @@ class AuthLogoSection extends StatelessWidget {
   }
 }
 
-// 2. Reusable Auth Text Input Field (Label above)
 class AuthTextField extends StatelessWidget {
   final String label; 
   final String hint; 
@@ -113,33 +111,64 @@ class AuthTextField extends StatelessWidget {
   }
 }
 
-// 3. Reusable Aligned Text Link (Green, Right/Left Aligned)
-class AuthTextLink extends StatelessWidget {
+class AuthTextLink extends StatefulWidget {
   final String text; // Vietnamese text (e.g., 'Quên mật khẩu?')
   final Alignment alignment; // Control positioning
   final VoidCallback onPressed;
-  final bool isBold;
 
   const AuthTextLink({
     super.key,
     required this.text,
     required this.alignment,
     required this.onPressed,
-    this.isBold = false,
   });
+
+  @override
+  State<AuthTextLink> createState() => _AuthTextLinkState();
+}
+
+class _AuthTextLinkState extends State<AuthTextLink> {
+  // Variable to track if the mouse is currently hovering
+  bool _isHovering = false;
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: alignment,
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Text(
-          text,
-          style: TextStyle(
-            color: const Color(0xFF39CB4E), // Custom green extracted
-            fontSize: 14,
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+      alignment: widget.alignment,
+      child: MouseRegion(
+        // Changes the mouse pointer to a pointing hand
+        cursor: SystemMouseCursors.click, 
+        
+        // Triggers when the mouse enters the text area
+        onEnter: (_) => setState(() => _isHovering = true),
+        
+        // Triggers when the mouse leaves the text area
+        onExit: (_) => setState(() => _isHovering = false),
+        
+        child: GestureDetector(
+          onTap: widget.onPressed,
+          
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.only(bottom: 2), // Space for underline
+            decoration: BoxDecoration(
+              // Adds a bottom border (underline) ONLY when hovering
+              border: Border(
+                bottom: BorderSide(
+                  color: _isHovering ? const Color(0xFF39CB4E) : Colors.transparent,
+                  width: 1.5,
+                ),
+              ),
+            ),
+            child: Text(
+              widget.text,
+              style: TextStyle(
+                // Change the color slightly when hovering (makes it a darker green)
+                color: _isHovering ? Colors.green.shade700 : const Color(0xFF39CB4E),
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
       ),
@@ -147,7 +176,6 @@ class AuthTextLink extends StatelessWidget {
   }
 }
 
-// 4. Reusable Primary Auth Button (Green, Full Width)
 class AuthButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;

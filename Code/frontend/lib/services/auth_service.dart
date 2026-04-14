@@ -8,13 +8,10 @@ import '../config/app_config.dart';
 
 
 class AuthService {
-  // Returns null if login is successful, or an error message string if it fails.
   static Future<String?> login(String email, String password) async {
-    // 1. Pointing to your exact Flask route
     final url = Uri.parse('${AppConfig.baseUrl}/user/login');
 
     try {
-      // 2. Send the POST request
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -24,26 +21,22 @@ class AuthService {
         }),
       );
 
-      // 3. Handle the 200 Success Response
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         
-        // Grab the token using the exact key from your Flask return jsonify(...)
         final token = data['access-token']; 
 
         // Save the token securely to local storage
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('jwt_token', token);
 
-        return null; // Return null to indicate no errors
+        return null;
       } 
-      // 4. Handle the 404 Error Response
       else if (response.statusCode == 404) {
         final data = jsonDecode(response.body);
         // Return the exact error message from Flask ("Wrong email or password")
         return data['error']; 
       } 
-      // Handle other unexpected server errors
       else {
         return 'Lỗi hệ thống: ${response.statusCode}'; 
       }
@@ -75,11 +68,9 @@ class AuthService {
         }),
       );
 
-      // Handle 201 Created (Success)
       if (response.statusCode == 201) {
-        return null; // Return null to indicate no errors
+        return null;
       } 
-      // Handle 400 Bad Request or other errors
       else {
         final data = jsonDecode(response.body);
         return data['error'] ?? 'Lỗi đăng ký: ${response.statusCode}';
@@ -91,7 +82,7 @@ class AuthService {
   }
 
   static Future<Map<String, dynamic>?> getUserProfile() async {
-    // 1. Get the token from storage
+    // Get the token from storage
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt_token');
 
@@ -100,21 +91,18 @@ class AuthService {
       return null;
     }
 
-    // 2. Decode the token to get the User ID
+    // Decode the token to get the User ID
     // Flask JWT Extended puts the 'identity' into a field called 'sub' (subject)
     Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
     final userId = decodedToken['sub'];
 
-    // 3. Build the URL with the dynamic ID
     final url = Uri.parse('${AppConfig.baseUrl}/user/$userId');
 
     try {
-      // 4. Send the GET request
       final response = await http.get(
         url,
         headers: {
           'Content-Type': 'application/json',
-          // It's good practice to send the token back to the server just in case
           'Authorization': 'Bearer $token', 
         },
       );
@@ -147,7 +135,6 @@ class AuthService {
     final url = Uri.parse('${AppConfig.baseUrl}/user/update/$userId');
 
     try {
-      // Note: Your backend uses POST for updates
       final response = await http.post(
         url,
         headers: {
@@ -193,5 +180,28 @@ class AuthService {
     } catch (e) {
       return 'Lỗi mạng: $e';
     }
+  }
+
+  static Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token != null) {
+      final url = Uri.parse('${AppConfig.baseUrl}/user/logout');
+      try {
+        await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token', 
+          },
+        );
+        print('Backend logout successful');
+      } catch (e) {
+        print('Network error during backend logout: $e');
+      }
+    }
+
+    await prefs.remove('jwt_token'); 
   }
 }

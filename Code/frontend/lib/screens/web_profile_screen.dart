@@ -26,7 +26,6 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-filling the data from your Figma design
     _fetchUserData();
   }
 
@@ -35,7 +34,6 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
 
     if (userData != null && mounted) {
       setState(() {
-        // Populate the controllers with the exact keys from your Flask API
         _emailController.text = userData['email'] ?? '';
         _nameController.text = userData['fullname'] ?? '';
         _dobController.text = userData['dob'] ?? '';
@@ -96,8 +94,6 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
     }
   }
 
-  // Make sure to import the Login screen at the top of your file!
-  // import 'web_login_screen.dart';
 
   void _handleDeleteAccount() {
     showDialog(
@@ -144,13 +140,11 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    // 1. Show the built-in Flutter calendar popup
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime(2005, 1, 1), // Default starting date
       firstDate: DateTime(1900), // Oldest selectable date
       lastDate: DateTime.now(), // Cannot pick a future date
-      // 2. Custom theme to make the calendar match your green brand color
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -165,12 +159,10 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
       },
     );
 
-    // 3. If the user picked a date (and didn't hit cancel)
     if (picked != null) {
       // Format it to DD/MM/YYYY so it matches your Figma design perfectly
       final formattedDate = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
       
-      // 4. Update the text controller, which automatically updates the UI
       setState(() {
         _dobController.text = formattedDate;
       });
