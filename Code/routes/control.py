@@ -4,7 +4,7 @@ from mqtt import client
 control_bp = Blueprint('control', __name__)
 
 # Vi du API bat/tat den
-@control_bp.route('/led', methods=['POST'])
+@control_bp.route('/control/led', methods=['POST'])
 def submit_led():
     """
     Control LED state
@@ -39,7 +39,7 @@ def submit_led():
     return {"status": "ok"}
 
 # API dieu khien toc do quat
-@control_bp.route('/fan', methods=['POST'])
+@control_bp.route('/control/fan', methods=['POST'])
 def submit_fan():
     """
     Control fan speed
@@ -73,7 +73,7 @@ def submit_fan():
     return {"status": "ok"}
 
 # API dieu khien mau den
-@control_bp.route('/color', methods=['POST'])
+@control_bp.route('/control/color', methods=['POST'])
 def submit_color():
     """
     Control LED color

@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, render_template
+from flask_cors import CORS
 from flasgger import Swagger
 
 load_dotenv()
@@ -10,6 +11,7 @@ from routes.control import control_bp
 from routes.sensor import sensor_bp
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 swagger = Swagger(app)
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt.init_app(app)
@@ -24,4 +26,4 @@ app.register_blueprint(control_bp)
 app.register_blueprint(sensor_bp)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

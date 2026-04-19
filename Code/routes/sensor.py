@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 import mqtt 
 sensor_bp = Blueprint('sensor', __name__)
 
-@sensor_bp.route('/temperature', methods=['GET'])
+@sensor_bp.route('/sensor/temperature', methods=['GET'])
 def get_temperature():
     """
     Get current temperature
@@ -28,7 +28,7 @@ def get_temperature():
         "created_at": mqtt.temp_time,
     }
 
-@sensor_bp.route('/temperature/history', methods=['GET'])
+@sensor_bp.route('/sensor/temperature/history', methods=['GET'])
 def get_temperature_history():
     """
     Get temperature history
@@ -70,7 +70,7 @@ def get_temperature_history():
         "history": history,
     }
 
-@sensor_bp.route('/humidity', methods=['GET'])
+@sensor_bp.route('/sensor/humidity', methods=['GET'])
 def get_humidity():
     """
     Get current humidity
@@ -96,7 +96,7 @@ def get_humidity():
         "created_at": mqtt.humid_time,
     }
 
-@sensor_bp.route('/brightness', methods=['GET'])
+@sensor_bp.route('/sensor/brightness', methods=['GET'])
 def get_brightness():
     """
     Get current brightness

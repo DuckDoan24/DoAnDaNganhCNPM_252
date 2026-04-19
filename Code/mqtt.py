@@ -5,18 +5,13 @@ import sys
 from Adafruit_IO import MQTTClient
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+from db import conn
 
 ##########################################
 ##### Khoi tao lien ket den Adafruit #####
 ##########################################
 AIO_USERNAME = os.getenv("ADA_USERNAME")
 AIO_KEY = os.getenv("ADA_KEY")
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LOCAL_DATA_DIR = os.path.join(BASE_DIR, "data")
-TEMPERATURE_HISTORY_FILE = os.path.join(LOCAL_DATA_DIR, "temperature_history.jsonl")
-TEMP_HISTORY_MAX_ITEMS = 1000
-_temp_history_lock = threading.Lock()
 
 latest_temp = None
 temp_time = None
@@ -60,52 +55,27 @@ def _parse_number(value):
     except (TypeError, ValueError):
         return value
 
-def _ensure_local_data_dir():
-    os.makedirs(LOCAL_DATA_DIR, exist_ok=True)
-
 
 def _append_temperature_history(value, created_at=None):
-    _ensure_local_data_dir()
-    entry = {
-        "value": _parse_number(value),
-        "created_at": created_at or datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(microsecond=0).isoformat(),
-    }
-
-    with _temp_history_lock:
-        with open(TEMPERATURE_HISTORY_FILE, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry) + "\n")
-
-        with open(TEMPERATURE_HISTORY_FILE, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-
-        if len(lines) > TEMP_HISTORY_MAX_ITEMS:
-            lines = lines[-TEMP_HISTORY_MAX_ITEMS:]
-            with open(TEMPERATURE_HISTORY_FILE, "w", encoding="utf-8") as f:
-                f.writelines(lines)
+    temp = _parse_number(value)
+    timestamp_str = created_at or datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(microsecond=0).isoformat()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO temperature (temperature, timestamp) VALUES (%s, %s)", (temp, timestamp_str))
+    conn.commit()
+    cur.close()
 
 
 def _read_temperature_history(limit):
-    with _temp_history_lock:
-        if not os.path.exists(TEMPERATURE_HISTORY_FILE):
-            return []
-
-        with open(TEMPERATURE_HISTORY_FILE, "r", encoding="utf-8") as f:
-            lines = [line.strip() for line in f.readlines() if line.strip()]
-
-    lines = lines[-limit:]
+    cur = conn.cursor()
+    cur.execute("SELECT temperature, timestamp FROM temperature ORDER BY id DESC LIMIT %s", (limit,))
+    rows = cur.fetchall()
+    cur.close()
     history = []
-    for line in lines:
-        try:
-            record = json.loads(line)
-            history.append(
-                {
-                    "value": _parse_number(record.get("value")),
-                    "created_at": record.get("created_at"),
-                }
-            )
-        except json.JSONDecodeError:
-            continue
-
+    for row in reversed(rows):
+        history.append({
+            "value": row[0],
+            "created_at": row[1].isoformat() if row[1] else None
+        })
     return history
 
 client = MQTTClient(AIO_USERNAME, AIO_KEY)

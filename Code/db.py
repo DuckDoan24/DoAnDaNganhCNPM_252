@@ -8,3 +8,27 @@ conn = psycopg2.connect(
     host="localhost", 
     port="5432"
     )
+
+cur = conn.cursor()
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    fullname VARCHAR(255) NOT NULL,
+    dob DATE,
+    phonenum VARCHAR(10),
+    password_hash TEXT NOT NULL
+);
+""")
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS temperature (
+    id SERIAL PRIMARY KEY,
+    temperature FLOAT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+""")
+
+conn.commit()
+cur.close()
