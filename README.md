@@ -18,6 +18,7 @@ DB_PASSWORD=<Your DB Password>
 ```
 ### 3. Chạy dự án
 ```bash
+cd Code
 python app.py
 ```
 API document: /localhost/apidocs
@@ -34,6 +35,7 @@ Lưu ý: Code có 1 API test gửi dữ liệu đến Adafruit sử dụng feed 
 
 ### 2. Chạy debug
 ```bash
+cd frontend
 flutter run -d chrome
 ```
 ### 3. Chạy build (WIP)
