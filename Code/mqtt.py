@@ -13,12 +13,12 @@ from db import conn
 AIO_USERNAME = os.getenv("ADA_USERNAME")
 AIO_KEY = os.getenv("ADA_KEY")
 
-latest_temp = None
-temp_time = None
-latest_humid = None
-humid_time = None
-latest_bright = None
-bright_time = None
+latest_temp = 0
+temp_time = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(microsecond=0).isoformat()
+latest_humid = 0
+humid_time = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(microsecond=0).isoformat()
+latest_bright = 0
+bright_time = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).replace(microsecond=0).isoformat()
 
 def connected (client) :
     print ("Ket noi thanh cong ...")

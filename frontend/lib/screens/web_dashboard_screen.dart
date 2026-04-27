@@ -106,11 +106,11 @@ class _WebDashboardScreenState extends State<WebDashboardScreen> {
   }
 
   Future<void> _fetchHumid() async {
-    final data = await SensorService.getTemperature();
+    final data = await SensorService.getHumidity();
     if (data != null && mounted){
       setState(() {
         double rawHumid = (data['value'] as num).toDouble();
-        _humidity = rawHumid.toStringAsFixed(0);
+        _humidity = rawHumid.toStringAsFixed(1);
         _lastUpdateHumid = data['created_at'] ?? 'Vừa xong';
       });
     }
