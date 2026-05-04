@@ -29,6 +29,9 @@ class _WebDashboardScreenState extends State<WebDashboardScreen> {
   String _lastUpdateBright = "Đang tải...";
 
   List<FlSpot> _tempHistorySpots = [];
+  List<String> _tempHistoryLabels = [];
+  double _tempChartMinY = 0;
+  double _tempChartMaxY = 40;
 
   Timer? _sensorTimer;
   
@@ -132,12 +135,27 @@ class _WebDashboardScreenState extends State<WebDashboardScreen> {
 
     if (history != null && mounted) {
       setState(() {
-        // Map the JSON array into a list of (X, Y) coordinates for the chart
-        _tempHistorySpots = history.asMap().entries.map((entry) {
-          int index = entry.key; // X-axis (0, 1, 2, 3...)
+        final spots = history.asMap().entries.map((entry) {
+          int index = entry.key; // X-axis position for each time sample
           double value = (entry.value['value'] as num).toDouble(); // Y-axis (Temperature)
           return FlSpot(index.toDouble(), value);
         }).toList();
+
+        _tempHistorySpots = spots;
+        _tempHistoryLabels = history.asMap().entries.map((entry) {
+          final rawTime = entry.value['created_at'] ?? '';
+          final parsed = DateTime.tryParse(rawTime.toString());
+          if (parsed != null) {
+            return '${parsed.hour.toString().padLeft(2, '0')}:${parsed.minute.toString().padLeft(2, '0')}';
+          }
+          return rawTime.toString();
+        }).toList();
+
+        final values = spots.map((spot) => spot.y).toList();
+        final maxValue = values.isNotEmpty ? values.reduce((a, b) => a > b ? a : b) : 0;
+        final minValue = values.isNotEmpty ? values.reduce((a, b) => a < b ? a : b) : 0;
+        _tempChartMaxY = (maxValue + 1).toDouble();
+        _tempChartMinY = (minValue - 1).toDouble();
       });
     }
   }
@@ -260,9 +278,49 @@ class _WebDashboardScreenState extends State<WebDashboardScreen> {
                     ? const Center(child: CircularProgressIndicator(color: Colors.green))
                     : LineChart(
                       LineChartData(
-                        gridData: const FlGridData(show: false),
+                        minY: _tempChartMinY,
+                        maxY: _tempChartMaxY,
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: false,
+                          horizontalInterval: ((_tempChartMaxY - _tempChartMinY) / 5).clamp(0.1, 5),
+                          getDrawingHorizontalLine: (value) => FlLine(
+                            color: Colors.grey.shade300,
+                            strokeWidth: 1,
+                          ),
+                        ),
                         borderData: FlBorderData(show: false),
-                        titlesData: const FlTitlesData(show: false),
+                        titlesData: FlTitlesData(
+                          show: true,
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 28,
+                              interval: _tempHistorySpots.isNotEmpty
+                                  ? (_tempHistorySpots.length / 5).floorToDouble().clamp(1, _tempHistorySpots.length.toDouble())
+                                  : 1,
+                              getTitlesWidget: (value, meta) {
+                                final index = value.toInt();
+                                if (index < 0 || index >= _tempHistoryLabels.length) {
+                                  return const SizedBox.shrink();
+                                }
+                                return Text(_tempHistoryLabels[index], style: const TextStyle(fontSize: 11, color: Colors.grey));
+                              },
+                            ),
+                          ),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              interval: ((_tempChartMaxY - _tempChartMinY) / 5).clamp(0.1, 5),
+                              getTitlesWidget: (value, meta) {
+                                return Text(value.toStringAsFixed(1), style: const TextStyle(fontSize: 11, color: Colors.grey));
+                              },
+                            ),
+                          ),
+                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        ),
                         lineBarsData: [
                           LineChartBarData(
                             spots: _tempHistorySpots,
@@ -322,17 +380,21 @@ class _WebDashboardScreenState extends State<WebDashboardScreen> {
             Text('Bảng điều khiển quản trị', style: TextStyle(color: Colors.grey)),
           ],
         ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const WebProfileScreen()),
-            );
-          },
-          child: Text(_userName, textAlign: TextAlign.right),
-        ),
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WebProfileScreen()),
+                );
+              },
+              icon: const Icon(Icons.account_circle, color: Colors.black),
+              label: Text(_userName, style: TextStyle(color: Colors.black)),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+            ),
+            const SizedBox(width: 10),
             ElevatedButton.icon(
               onPressed: () async { 
                 await AuthService.logout();
