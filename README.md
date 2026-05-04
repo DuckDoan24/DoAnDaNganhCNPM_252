@@ -33,9 +33,32 @@ Lưu ý: Code có 1 API test gửi dữ liệu đến Adafruit sử dụng feed 
    flutter config --enable-web
    ```
 
+4. Set up lấy các package mới nhất
+   ```bash
+   cd frontend
+   flutter pub get
+   ```
+
 ### 2. Chạy debug
 ```bash
 cd frontend
 flutter run -d chrome
 ```
-### 3. Chạy build (WIP)
+### 3. Chạy build
+```bash
+cd frontend
+flutter build web
+```
+
+   Có 2 cách để chạy web:
+   - Cách 1:
+   ```bash
+   cd build/web
+   python -m http.server 8000
+   ```
+
+   - Cách 2:
+   ```bash
+   npm install -g serve
+   npx serve build/web
+   ```
