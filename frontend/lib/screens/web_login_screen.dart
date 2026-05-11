@@ -99,7 +99,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                         children: [
                           const Center(
                             child: AuthLogoSection(
-                              logoAssetPath: 'images/logo.png',
+                              logoAssetPath: 'assets/images/logo.png',
                               descriptionText:
                                   'Đăng nhập để quản lí ngôi nhà thông minh của bạn',
                             ),

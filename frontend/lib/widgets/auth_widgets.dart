@@ -90,6 +90,7 @@ class AuthTextField extends StatelessWidget {
           child: TextFormField(
             controller: controller,
             obscureText: isObscure,
+            readOnly: readOnly,
             validator: validator,
             decoration: InputDecoration(
               hintText: hint,

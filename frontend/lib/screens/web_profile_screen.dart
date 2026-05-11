@@ -1,7 +1,9 @@
 // lib/screens/web_profile_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:frontend/screens/web_login_screen.dart';
+import 'package:frontend/screens/web_dashboard_screen.dart';
 import '../widgets/auth_widgets.dart';
 import '../services/auth_service.dart';
 
@@ -36,7 +38,12 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
       setState(() {
         _emailController.text = userData['email'] ?? '';
         _nameController.text = userData['fullname'] ?? '';
-        _dobController.text = userData['dob'] ?? '';
+        if (userData['dob'] != null) {
+          final dt = DateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", 'en_US').parse(userData['dob']);
+          _dobController.text = "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}";
+        } else {
+          _dobController.text = '';
+        }
         _phoneController.text = userData['phonenum'] ?? '';
         
         // Turn off the loading spinner
@@ -198,10 +205,26 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: TextButton.icon(
+                              onPressed: () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const WebDashboardScreen()),
+                                  (route) => false,
+                                );
+                              },
+                              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                              label: const Text('Quay lại', style: TextStyle(color: Colors.black)),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                           // 1. Logo Section (Reusing AuthLogoSection, leaving description blank)
                           const Center(
                             child: AuthLogoSection(
-                              logoAssetPath: 'images/logo.png',
+                              logoAssetPath: 'assets/images/logo.png',
                               descriptionText: '', 
                             ),
                           ),
@@ -234,17 +257,21 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                           ),
                           const SizedBox(height: 20),
 
-                          AuthTextField(
-                            label: 'Ngày sinh',
-                            controller: _dobController,
-                            readOnly: true,
+                          GestureDetector(
                             onTap: _isEditing ? () => _selectDate(context) : null,
+                            child: AbsorbPointer( // prevents the TextField from blocking the tap
+                              child: AuthTextField(
+                                label: 'Ngày sinh',
+                                controller: _dobController,
+                                readOnly: true,
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 20),
 
                           AuthTextField(
                             label: 'Số điện thoại',
                             controller: _phoneController,
+                            readOnly: !_isEditing,
                           ),
                           const SizedBox(height: 20),
 

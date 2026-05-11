@@ -160,7 +160,7 @@ class _WebRegisterScreenState extends State<WebRegisterScreen> {
                             // 1. Logo Section
                             const Center(
                               child: AuthLogoSection(
-                                logoAssetPath: 'images/logo.png', // Replace with your logo
+                                logoAssetPath: 'assets/images/logo.png', // Replace with your logo
                                 descriptionText: 'Chào mừng bạn đến với nhà thông minh',
                               ),
                             ),

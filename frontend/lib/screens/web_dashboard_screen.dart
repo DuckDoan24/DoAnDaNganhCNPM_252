@@ -247,172 +247,229 @@ class _WebDashboardScreenState extends State<WebDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA), // Light grey background
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 30),
-            
-            // Top Row: Sensors
-            Row(
-              children: [
-                Expanded(child: _buildSensorCard('Nhiệt độ', '$_temperature°C', 'Cập nhât: $_lastUpdateTemp', Colors.green)),
-                const SizedBox(width: 20),
-                Expanded(child: _buildSensorCard('Độ ẩm', '$_humidity%', 'Cập nhật: $_lastUpdateHumid', Colors.green)),
-                const SizedBox(width: 20),
-                Expanded(child: _buildSensorCard('Độ sáng', '$_brightness lx', 'Cập nhật: $_lastUpdateBright', Colors.green)),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Middle Row: Chart & Devices
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(flex: 1, child: _buildPanel('Biểu đồ nhiệt độ',
-                  SizedBox(
-                    height: 250,
-                    child: _tempHistorySpots.isEmpty
-                    ? const Center(child: CircularProgressIndicator(color: Colors.green))
-                    : LineChart(
-                      LineChartData(
-                        minY: _tempChartMinY,
-                        maxY: _tempChartMaxY,
-                        gridData: FlGridData(
-                          show: true,
-                          drawVerticalLine: false,
-                          horizontalInterval: ((_tempChartMaxY - _tempChartMinY) / 5).clamp(0.1, 5),
-                          getDrawingHorizontalLine: (value) => FlLine(
-                            color: Colors.grey.shade300,
-                            strokeWidth: 1,
-                          ),
-                        ),
-                        borderData: FlBorderData(show: false),
-                        titlesData: FlTitlesData(
-                          show: true,
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 28,
-                              interval: _tempHistorySpots.isNotEmpty
-                                  ? (_tempHistorySpots.length / 5).floorToDouble().clamp(1, _tempHistorySpots.length.toDouble())
-                                  : 1,
-                              getTitlesWidget: (value, meta) {
-                                final index = value.toInt();
-                                if (index < 0 || index >= _tempHistoryLabels.length) {
-                                  return const SizedBox.shrink();
-                                }
-                                return Text(_tempHistoryLabels[index], style: const TextStyle(fontSize: 11, color: Colors.grey));
-                              },
-                            ),
-                          ),
-                          leftTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 40,
-                              interval: ((_tempChartMaxY - _tempChartMinY) / 5).clamp(0.1, 5),
-                              getTitlesWidget: (value, meta) {
-                                return Text(value.toStringAsFixed(1), style: const TextStyle(fontSize: 11, color: Colors.grey));
-                              },
-                            ),
-                          ),
-                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        ),
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: _tempHistorySpots,
-                            isCurved: true, // Makes the line smooth instead of jagged
-                            color: Colors.green, // Brand color
-                            barWidth: 3,
-                            isStrokeCapRound: true,
-                            dotData: const FlDotData(show: false), // Hides the dots on the line
-                                  
-                            // Adds a cool semi-transparent gradient below the line
-                            belowBarData: BarAreaData(
-                              show: true,
-                              color: Colors.green.withValues(alpha: 0.2), 
-                            ),
-                          ),
-                        ],
-                      ),
-                      ),
-                    ),
-                  )
-                ),
-                const SizedBox(width: 20),
-                Expanded(flex: 1, child: _buildDeviceControls()),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Bottom Row: Alerts & Settings
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(flex: 1, child: _buildAlertsPanel()),
-                const SizedBox(width: 20),
-                Expanded(flex: 1, child: _buildSettingsPanel()),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Footer: Logs
-            _buildLogsPanel(),
-          ],
-        ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final bool isMobile = constraints.maxWidth < 700;
+          return _buildBody(isMobile);
+        },
       ),
+    );
+  }
+
+  Widget _buildBody(bool isMobile) {
+    final EdgeInsets padding = isMobile
+        ? const EdgeInsets.all(16.0)
+        : const EdgeInsets.all(30.0);
+
+    return SingleChildScrollView(
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(isMobile),
+          const SizedBox(height: 24),
+
+          // Top Row: Sensors — stacked on mobile, side-by-side on desktop
+          isMobile
+              ? Column(
+                  children: [
+                    _buildSensorCard('Nhiệt độ', '$_temperature°C', 'Cập nhật: $_lastUpdateTemp', Colors.green),
+                    const SizedBox(height: 12),
+                    _buildSensorCard('Độ ẩm', '$_humidity%', 'Cập nhật: $_lastUpdateHumid', Colors.green),
+                    const SizedBox(height: 12),
+                    _buildSensorCard('Độ sáng', '$_brightness lx', 'Cập nhật: $_lastUpdateBright', Colors.green),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(child: _buildSensorCard('Nhiệt độ', '$_temperature°C', 'Cập nhât: $_lastUpdateTemp', Colors.green)),
+                    const SizedBox(width: 20),
+                    Expanded(child: _buildSensorCard('Độ ẩm', '$_humidity%', 'Cập nhật: $_lastUpdateHumid', Colors.green)),
+                    const SizedBox(width: 20),
+                    Expanded(child: _buildSensorCard('Độ sáng', '$_brightness lx', 'Cập nhật: $_lastUpdateBright', Colors.green)),
+                  ],
+                ),
+          const SizedBox(height: 20),
+
+          // Middle Row: Chart & Devices
+          isMobile
+              ? Column(
+                  children: [
+                    _buildPanel('Biểu đồ nhiệt độ', _buildTempChart()),
+                    const SizedBox(height: 20),
+                    _buildDeviceControls(),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 1, child: _buildPanel('Biểu đồ nhiệt độ', _buildTempChart())),
+                    const SizedBox(width: 20),
+                    Expanded(flex: 1, child: _buildDeviceControls()),
+                  ],
+                ),
+          const SizedBox(height: 20),
+
+          // Bottom Row: Alerts & Settings
+          isMobile
+              ? Column(
+                  children: [
+                    _buildAlertsPanel(),
+                    const SizedBox(height: 20),
+                    _buildSettingsPanel(),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 1, child: _buildAlertsPanel()),
+                    const SizedBox(width: 20),
+                    Expanded(flex: 1, child: _buildSettingsPanel()),
+                  ],
+                ),
+          const SizedBox(height: 20),
+
+          // Footer: Logs
+          _buildLogsPanel(),
+        ],
+      ),
+    );
+  }
+
+  // Extracted chart widget to avoid duplication
+  Widget _buildTempChart() {
+    return SizedBox(
+      height: 250,
+      child: _tempHistorySpots.isEmpty
+          ? const Center(child: CircularProgressIndicator(color: Colors.green))
+          : LineChart(
+              LineChartData(
+                minY: _tempChartMinY,
+                maxY: _tempChartMaxY,
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  horizontalInterval: ((_tempChartMaxY - _tempChartMinY) / 5).clamp(0.1, 5),
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: Colors.grey.shade300,
+                    strokeWidth: 1,
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 28,
+                      interval: _tempHistorySpots.isNotEmpty
+                          ? (_tempHistorySpots.length / 5).floorToDouble().clamp(1, _tempHistorySpots.length.toDouble())
+                          : 1,
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        if (index < 0 || index >= _tempHistoryLabels.length) {
+                          return const SizedBox.shrink();
+                        }
+                        return Text(_tempHistoryLabels[index], style: const TextStyle(fontSize: 11, color: Colors.grey));
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      interval: ((_tempChartMaxY - _tempChartMinY) / 5).clamp(0.1, 5),
+                      getTitlesWidget: (value, meta) {
+                        return Text(value.toStringAsFixed(1), style: const TextStyle(fontSize: 11, color: Colors.grey));
+                      },
+                    ),
+                  ),
+                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: _tempHistorySpots,
+                    isCurved: true,
+                    color: Colors.green,
+                    barWidth: 3,
+                    isStrokeCapRound: true,
+                    dotData: const FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: Colors.green.withValues(alpha: 0.2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
   // --- HELPER WIDGETS ---
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isMobile) {
+    final titleSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Smart Home Dashboard',
+          style: TextStyle(fontSize: isMobile ? 20 : 24, fontWeight: FontWeight.bold),
+        ),
+        const Text('Bảng điều khiển quản trị', style: TextStyle(color: Colors.grey)),
+      ],
+    );
+
+    final actionButtons = Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      alignment: isMobile ? WrapAlignment.start : WrapAlignment.end,
+      children: [
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const WebProfileScreen()),
+            );
+          },
+          icon: const Icon(Icons.account_circle, color: Colors.black),
+          label: Text(_userName, style: const TextStyle(color: Colors.black)),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+        ),
+        ElevatedButton.icon(
+          onPressed: () async {
+            await AuthService.logout();
+            if (mounted) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const WebLoginScreen()),
+                (route) => false,
+              );
+            }
+          },
+          icon: const Icon(Icons.logout, color: Colors.black),
+          label: const Text('Đăng xuất', style: TextStyle(color: Colors.black)),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+        ),
+      ],
+    );
+
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          titleSection,
+          const SizedBox(height: 12),
+          actionButtons,
+        ],
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Smart Home Dashboard', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Text('Bảng điều khiển quản trị', style: TextStyle(color: Colors.grey)),
-          ],
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const WebProfileScreen()),
-                );
-              },
-              icon: const Icon(Icons.account_circle, color: Colors.black),
-              label: Text(_userName, style: TextStyle(color: Colors.black)),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
-            ),
-            const SizedBox(width: 10),
-            ElevatedButton.icon(
-              onPressed: () async { 
-                await AuthService.logout();
-
-                if (mounted){
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const WebLoginScreen()), 
-                    (route) => false
-                  );
-                }
-                },
-              icon: const Icon(Icons.logout, color: Colors.black),
-              label: const Text('Đăng xuất', style: TextStyle(color: Colors.black)),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
-            )
-          ],
-        )
+        titleSection,
+        actionButtons,
       ],
     );
   }
@@ -488,9 +545,6 @@ class _WebDashboardScreenState extends State<WebDashboardScreen> {
             },
           ),
           const SizedBox(height: 10),
-          _buildDeviceSwitch('Máy lạnh', false, (val) => setState(() => false)),
-          const SizedBox(height: 10),
-          _buildDeviceSwitch('Máy hút ẩm', false, (val) => setState(() => false)),
         ],
       ),
     );
