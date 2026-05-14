@@ -8,7 +8,6 @@ Hệ thống quản lý nhà thông minh YOLO:HOME là một hệ thống IoT k�
 - Đăng ký
 - Đăng nhập
 - Chỉnh sửa hồ sơ
-- Quên mật khẩu
 
 ### Theo dõi cảm biến
 - Cập nhật các giá trị cảm biến nhiệt độ, độ ẩm, ánh sáng theo thời gian thực
