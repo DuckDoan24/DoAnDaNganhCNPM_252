@@ -18,7 +18,7 @@ Hệ thống quản lý nhà thông minh YOLO:HOME là một hệ thống IoT k�
 - Chỉnh màu sắc đèn
 - Điều khiển tốc độ quạt
 
-### Tích hợp trên mạch phàn cứng
+### Tích hợp trên mạch phần cứng
 - Mở cửa bằng AI nhận diện khuôn mặt
 - Mở cửa bằng remote bấm mật mã
 - Bật tắt đèn bằng cảm biến chuyển động
